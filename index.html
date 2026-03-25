@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARM: Advantage Reward Modeling for Long-Horizon Manipulation</title>
+    <meta
+      name="description"
+      content="ARM is a reward modeling framework for long-horizon robotic manipulation that replaces absolute progress scoring with tri-state advantage labeling and advantage-aware policy optimization."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.renderMathInElement) {
+          window.renderMathInElement(document.body, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false }
+            ]
+          });
+        }
+      });
+    </script>
+    <link rel="icon" type="image/svg+xml" href="logo/Component%203.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="header-brand-group">
+          <img src="logo/%E9%80%90%E9%99%85%E5%8A%A8%E5%8A%9B%20-%20%E8%8B%B1%E6%96%87Logo%EF%BC%88%E5%BD%A9%E8%89%B2%EF%BC%89.svg" alt="LimX Dynamics logo" class="header-company-logo" />
+          <a class="brand" href="#top" aria-label="ARM Home">
+            <img src="logo/Component%203.svg" alt="ARM logo" class="brand-logo" />
+            <div class="brand-copy">
+              <span class="brand-name">ARM</span>
+              <span class="brand-subtitle">Advantage Reward Modeling</span>
+            </div>
+          </a>
+        </div>
+        <nav class="nav-links">
+          <a href="#overview">Overview</a>
+          <a href="#method">Method</a>
+          <a href="#results">Results</a>
+          <a href="#citation">Citation</a>
+        </nav>
+      </header>
+
+      <main id="top">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">LimX Dynamics</p>
+            <h1>ARM: Advantage Reward Modeling for Long-Horizon Manipulation</h1>
+            <div class="hero-authors">
+              <p class="author-line">
+                  <span class="author-name">Yiming Mao</span>
+                  <span class="author-name">Zixi Yu</span>
+                  <span class="author-name">Weixin Mao</span>
+                  <span class="author-name">Yinhao Li</span>
+                  <span class="author-name">Qirui Hu</span>
+                  <span class="author-name">Zihan Lan</span>
+                  <span class="author-name">Minzhao Zhu</span>
+                  <span class="author-name">Hua Chen<sup>*</sup></span>
+              </p>
+                <p class="affiliation-line"><span>LimX Dynamics</span></p>
+            </div>
+            <div class="hero-links">
+              <span class="project-link project-link-disabled" aria-disabled="true">
+                <span class="project-link-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.21-3.37-1.21-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .08 1.53 1.05 1.53 1.05.9 1.57 2.35 1.12 2.92.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.08 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0 1 12 6.91c.85 0 1.71.12 2.5.35 1.9-1.33 2.74-1.05 2.74-1.05.55 1.4.21 2.44.11 2.7.64.72 1.03 1.63 1.03 2.75 0 3.95-2.34 4.81-4.57 5.07.36.32.68.95.68 1.92 0 1.39-.01 2.5-.01 2.84 0 .28.18.61.69.5A10.25 10.25 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z" />
+                  </svg>
+                </span>
+                <span>GitHub</span>
+              </span>
+              <a class="project-link" href="CVPR_Reward.pdf" target="_blank" rel="noreferrer">
+                <span class="project-link-icon project-link-icon-arxiv" aria-hidden="true">
+                  <img src="logo/arxiv-logo.svg" alt="" />
+                </span>
+                <span>arXiv</span>
+              </a>
+              <a class="project-link" href="CVPR_Reward.pdf" target="_blank" rel="noreferrer">
+                <span class="project-link-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
+                    <path d="M14 3v5h5" />
+                    <path d="M9 13h6" />
+                    <path d="M9 17h6" />
+                  </svg>
+                </span>
+                <span>Paper PDF</span>
+              </a>
+              <a class="project-link button-secondary" href="#citation">Citation</a>
+            </div>
+            <div class="hero-body">
+              <div class="hero-abstract reveal is-visible">
+                <div class="hero-abstract-head">
+                  <span class="hero-abstract-label">Abstract</span>
+                </div>
+                <p>
+                  Long-horizon robotic manipulation remains challenging for reinforcement
+                  learning (RL) because sparse rewards provide limited guidance for credit
+                  assignment. Practical policy improvement often relies on richer
+                  intermediate supervision, such as dense progress rewards, which are
+                  costly to obtain and ill-suited to non-monotonic behaviors such as
+                  backtracking and recovery. We propose Advantage Reward Modeling (ARM),
+                  a framework that shifts from hard-to-quantify absolute progress to
+                  estimating relative advantage. We introduce a cost-effective tri-state
+                  labeling strategy&mdash;Progressive, Regressive, and Stagnant&mdash;that
+                  significantly reduces human cognitive overhead while ensuring high
+                  cross-annotator consistency. By training on these intuitive signals,
+                  ARM enables robust, automated progress annotation for both complete
+                  demonstrations and fragmented DAgger-style data. Integrating ARM into
+                  an offline RL pipeline allows for adaptive action-reward reweighting,
+                  effectively filtering suboptimal samples. Our approach achieves a
+                  <strong>99.4% success rate</strong> on a challenging long-horizon
+                  towel-folding task, demonstrating superior stability and data efficiency
+                  over state-of-the-art VLA baselines with near-zero human intervention
+                  during policy training.
+                </p>
+              </div>
+            </div>
+            <ul class="hero-metrics">
+              <li>
+                <strong>Accuracy 99.4%</strong>
+                <span>success rate on long-horizon towel folding</span>
+              </li>
+              <li>
+                <strong>Efficiency ×2.5</strong>
+                <span>higher annotation efficiency than subtask-style labeling</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="overview" class="overview-section content-section">
+          <div class="overview-layout">
+            <div class="section-heading overview-heading-block">
+              <p class="eyebrow">Overview</p>
+              <h2>The Reward Engineering Bottleneck&mdash;<br>ARM resolves it.</h2>
+              <p>
+                Existing reward models for long-horizon manipulation predicate progress
+                on strict temporal monotonicity, expose quantization ambiguity in failure
+                states, and depend on brittle subtask partitions that miss critical
+                intra-stage transitions such as recovery and corrective maneuvers. ARM
+                decouples progress rewards from global temporal anchors by estimating
+                <em>relative advantage</em> (interval gain) instead of absolute
+                progress&mdash;a task-agnostic primitive that is intuitive to annotate
+                and naturally accommodates regressive behaviors.
+              </p>
+            </div>
+            <aside class="overview-sidecard reveal">
+              <span class="sidecard-label">Core Insight</span>
+              <div class="sidecard-item">
+                <strong>Relative over absolute</strong>
+                <p>Interval gain is a task-agnostic primitive that does not require hard-to-define global progress benchmarks.</p>
+              </div>
+              <div class="sidecard-item">
+                <strong>Monotonicity-free</strong>
+                <p>ARM evaluates advantage against causal history, remaining robust to backtracking, errors, and recovery phases.</p>
+              </div>
+              <div class="sidecard-item">
+                <strong>End-to-end scalable</strong>
+                <p>MIMO parallel inference replaces redundant sliding-window evaluation, yielding ~5× speedup over SARM.</p>
+              </div>
+            </aside>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card reveal">
+              <span class="feature-index">01</span>
+              <h3>Tri-state Labeling Strategy</h3>
+              <p>
+                Progressive, Regressive, and Stagnant labels impose minimal cognitive
+                load, achieve high cross-annotator consistency, and are natively
+                compatible with heterogeneous and fragmented DAgger-style datasets&mdash;
+                without requiring subtask boundaries or numeric progress values.
+              </p>
+            </article>
+            <article class="feature-card reveal">
+              <span class="feature-index">02</span>
+              <h3>MIMO Temporal Advantage Transformer</h3>
+              <p>
+                A multimodal model integrating temporal video sequences with proprioceptive
+                states. The MIMO architecture predicts the entire advantage sequence in
+                a single forward pass and anchors predictions with a task-completion
+                head for globally consistent progress reconstruction.
+              </p>
+            </article>
+            <article class="feature-card reveal">
+              <span class="feature-index">03</span>
+              <h3>Advantage-Weighted Behavior Cloning</h3>
+              <p>
+                Length-invariant interval gains adaptively reweight action chunks,
+                filtering suboptimal samples and prioritizing high-value recovery
+                trajectories&mdash;extending RA-BC with adaptive scaling coefficients
+                for fragmented DAgger data.
+              </p>
+            </article>
+          </div>
+
+          <figure class="overview-visual reveal">
+            <img src="paper_source/misomimo.svg" alt="Comparison between MISO and MIMO architectures" class="overview-visual-image" />
+            <figcaption class="overview-visual-caption">Comparison between MISO and MIMO architectures used for reward modeling.</figcaption>
+          </figure>
+        </section>
+
+        <section class="video-section content-section">
+          <div class="section-heading narrow">
+            <p class="eyebrow">Project Video</p>
+            <h2>System demo and long-horizon manipulation behavior</h2>
+          </div>
+          <div class="video-frame reveal">
+            <video controls playsinline preload="metadata" poster="video/0109-poster.jpg">
+              <source src="video/0109.mp4" type="video/mp4" />
+              <source src="video/0109.mov" type="video/quicktime" />
+              Your browser does not support the project video.
+            </video>
+          </div>
+        </section>
+
+        <section id="method" class="method-section content-section">
+          <div class="split-copy">
+            <p class="eyebrow">Method</p>
+            <h2>From lightweight labels to globally consistent reward trajectories</h2>
+            <p>
+              ARM consists of three linked stages: lightweight tri-state annotation,
+              advantage reward modeling with historical context, and AW-BC policy
+              optimization using length-invariant gains. This design removes the need
+              for task-specific heuristics that define absolute progress.
+            </p>
+            <div class="pill-list method-figure-pills">
+              <span>Task-agnostic labeling</span>
+              <span>Causal temporal modeling</span>
+              <span>Offline RL compatible</span>
+              <span>Robust to backtracking</span>
+            </div>
+            <div class="method-figure-heading">Overview of our proposed framework.</div>
+            <div class="split-visual reveal is-visible">
+              <figure class="method-figure">
+                <img src="paper_source/ARM.svg" alt="Overview of the ARM model architecture" class="method-figure-image" />
+              </figure>
+            </div>
+            <div class="method-detail-block">
+              <div class="method-steps">
+                <article class="method-step reveal">
+                  <div class="method-step-head">
+                    <span class="method-step-index">Step A</span>
+                    <h3>Lightweight Tri-state Advantage Labeling</h3>
+                  </div>
+                  <p class="method-step-intro">
+                    Annotators inspect short temporal segments instead of assigning dense
+                    global progress scores. Each segment only needs a directional judgment,
+                    which makes supervision faster, more consistent, and more robust to
+                    non-monotonic behaviors such as recovery, hesitation, and backtracking.
+                  </p>
+                  <div class="method-formula-panel">
+                    <span class="method-formula-label">Core Label Space</span>
+                    <div class="method-formula-display">$$y \in \{-1, 0, +1\}$$</div>
+                    <p>The annotation target is reduced to a tri-state directional signal rather than a dense scalar progress value.</p>
+                  </div>
+                  <figure class="method-step-visual">
+                    <img src="paper_source/episode_000011_reward_layout_vector.svg" alt="Illustration of the lightweight tri-state advantage labeling strategy" class="method-step-visual-image" />
+                    <figcaption class="method-step-visual-caption">Lightweight Tri-state Advantage Labeling Strategy</figcaption>
+                  </figure>
+                  <div class="method-step-legend" aria-label="Tri-state label definitions">
+                    <div class="method-step-legend-item legend-stagnant">
+                      <span class="method-step-legend-value">0</span>
+                      <div>
+                        <strong>Stagnant</strong>
+                        <p>No substantial progress is made, corresponding to waiting or idle behavior.</p>
+                      </div>
+                    </div>
+                    <div class="method-step-legend-item legend-regressing">
+                      <span class="method-step-legend-value">-1</span>
+                      <div>
+                        <strong>Regressing</strong>
+                        <p>The state deviates from the goal, encounters an error, or results in failure.</p>
+                      </div>
+                    </div>
+                    <div class="method-step-legend-item legend-progressing">
+                      <span class="method-step-legend-value">+1</span>
+                      <div>
+                        <strong>Progressing</strong>
+                        <p>The state effectively advances toward the task goal.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="method-step-notes">
+                    <div class="method-note-card">
+                      <span class="method-note-label">Input</span>
+                      <p>Short observation segments sampled from long-horizon demonstrations.</p>
+                    </div>
+                    <div class="method-note-card">
+                      <span class="method-note-label">Why It Matters</span>
+                      <p>It removes the need for fragile subtask boundaries and dense scalar progress annotations.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="method-step reveal">
+                  <div class="method-step-head">
+                    <span class="method-step-index">Step B</span>
+                    <h3>Advantage Reward Modeling with Historical Context</h3>
+                  </div>
+                  <p>
+                    ARM uses causal temporal context to infer interval gains from local
+                    observations and tri-state supervision. Rather than scoring each state
+                    in isolation, the model reasons about whether the system is moving
+                    forward, stalling, or regressing given what has happened before.
+                  </p>
+                  <div class="method-step-notes method-step-notes-wide">
+                    <div class="method-note-card">
+                      <span class="method-note-label">Modeling Choice</span>
+                      <p>Historical observations help distinguish genuine progress from noisy motion, tangles, or temporary regressions.</p>
+                    </div>
+                    <div class="method-note-card">
+                      <span class="method-note-label">Output</span>
+                      <p>Predicted interval advantages that can be accumulated into a globally consistent progress trajectory.</p>
+                    </div>
+                    <div class="method-note-card">
+                      <span class="method-note-label">Efficiency</span>
+                      <p>The sequence-oriented ARM formulation supports parallel inference and avoids the heavy redundancy of sliding-window reward evaluation.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="method-step reveal">
+                  <div class="method-step-head">
+                    <span class="method-step-index">Step C</span>
+                    <h3>Global Reconstruction and Advantage-Weighted Behavior Cloning</h3>
+                  </div>
+                  <p>
+                    The predicted interval gains are reconstructed into trajectory-level
+                    progress signals and then converted into length-invariant weights for
+                    behavior cloning. This makes the final policy focus on demonstrations
+                    and action chunks that create meaningful task advancement.
+                  </p>
+                  <div class="method-formula-grid">
+                    <div class="method-formula-pair">
+                      <div class="method-formula-panel">
+                        <span class="method-formula-label">Normalized Interval Gain</span>
+                        <div class="method-formula-display">$$\Delta G_t = (P_{t+H} - P_t) \cdot \frac{L_{seq}}{\bar{L}}$$</div>
+                        <p>ARM rescales interval progress by episode length to remove the bias induced by heterogeneous trajectory durations.</p>
+                      </div>
+                      <div class="method-note-card method-note-card-inline">
+                        <span class="method-note-label">Reconstruction</span>
+                        <p>Interval-level rewards are accumulated into a more coherent notion of overall progress across the trajectory.</p>
+                      </div>
+                    </div>
+                    <div class="method-formula-pair is-reversed">
+                      <div class="method-note-card method-note-card-inline">
+                        <span class="method-note-label">Policy Signal</span>
+                        <p>Higher-value chunks receive stronger supervision, while low-quality or non-productive behavior is down-weighted.</p>
+                      </div>
+                      <div class="method-formula-panel">
+                        <span class="method-formula-label">Statistical Weighting</span>
+                        <div class="method-formula-display">$$\tilde{w}_i = \operatorname{clamp}\!\left(\frac{\Delta G_i - b_{lower}}{b_{upper} - b_{lower} + \epsilon}, 0, 1\right)$$</div>
+                        <p>Batch statistics clamp regressive samples toward zero while preventing a few outliers from dominating training.</p>
+                      </div>
+                    </div>
+                    <div class="method-formula-pair">
+                      <div class="method-formula-panel">
+                        <span class="method-formula-label">AW-BC Objective</span>
+                        <div class="method-formula-display">$$L_{AW-BC}(\theta) = \mathbb{E}_{(s,a) \sim \mathcal{D}}\left[-\tilde{w}(s,a)\log \pi_\theta(a\mid s)\right]$$</div>
+                        <p>The policy is optimized by weighting action likelihood with the reconstructed advantage signal from ARM.</p>
+                      </div>
+                      <div class="method-note-card method-note-card-inline">
+                        <span class="method-note-label">Result</span>
+                        <p>The final AW-BC stage improves offline policy learning under long-horizon manipulation with recovery and backtracking.</p>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="results" class="results-section content-section">
+          <div class="section-heading">
+            <p class="eyebrow">Results</p>
+            <h2>Higher policy quality with less annotation burden</h2>
+            <p>
+              The paper evaluates ARM on a demanding long-horizon towel-folding task.
+              Compared with prior baselines, ARM handles backtracking and corrective
+              phases more reliably while significantly improving final policy success
+              and data efficiency.
+            </p>
+          </div>
+
+          <div class="results-grid">
+            <article class="highlight-card reveal">
+              <div class="highlight-value">99.4%</div>
+              <p>Long-horizon towel-folding success rate with Gr00t N1.5 + ARM (AW-BC).</p>
+            </article>
+            <article class="highlight-card reveal">
+              <div class="highlight-value">32 samples/h</div>
+              <p>Labeling throughput in 8 hours under the proposed setting shown in the paper.</p>
+            </article>
+            <article class="highlight-card reveal">
+              <div class="highlight-value">3.4</div>
+              <p>Average folding precision reported for the final policy in the main experiment table.</p>
+            </article>
+          </div>
+
+          <div class="results-insights">
+            <article class="results-insight reveal">
+              <span class="results-insight-label">Annotation</span>
+              <h3>Faster than subtask-style supervision</h3>
+              <p>
+                ARM replaces brittle progress scoring with a label space that is easier
+                for humans to apply consistently across long-horizon episodes.
+              </p>
+            </article>
+            <article class="results-insight reveal">
+              <span class="results-insight-label">Learning</span>
+              <h3>Higher-value action chunks receive more weight</h3>
+              <p>
+                Reconstructed gains translate directly into action reweighting, helping
+                the policy focus on demonstrations that contribute useful progress.
+              </p>
+            </article>
+            <article class="results-insight reveal">
+              <span class="results-insight-label">Reliability</span>
+              <h3>Better handling of recovery and regression</h3>
+              <p>
+                Relative advantage remains informative when the robot backtracks,
+                tangles, or corrects itself during execution.
+              </p>
+            </article>
+          </div>
+
+          <div class="results-tables-intro reveal">
+            <span class="results-tables-kicker">Quantitative Evidence</span>
+            <p>
+              The following tables consolidate the main quantitative evidence behind
+              ARM, covering annotation efficiency, inference cost, and downstream
+              policy performance in long-horizon manipulation.
+            </p>
+          </div>
+
+          <div class="result-tables">
+            <article class="result-table-card reveal">
+              <div class="result-table-head">
+                <p class="result-table-caption">
+                  <strong>Table 1.&nbsp;&nbsp;Quantitative Evaluation of Reward Models.</strong>
+                  All models are evaluated on a validation set of <strong>50 trajectories</strong>.
+                  “MSE” measures the trajectory reconstruction fidelity against Ground Truth (GT)
+                  progress (normalized to [0, 1]). The bottom section reports the
+                  <strong>Success Identification Accuracy</strong>, assessing the Completion Head’s
+                  ability to correctly classify the final state of Standard (SE, 12 successful
+                  episodes), and Failure (FE, 12 failed episodes) trajectories. Best
+                  performances are highlighted in <strong>bold</strong>.
+                </p>
+              </div>
+              <div class="table-scroll">
+                <table class="result-table result-table-reward">
+                  <thead>
+                    <tr>
+                      <th>Metrics</th>
+                      <th>SARM</th>
+                      <th>ARM (Ours)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>MSE ↓</td>
+                      <td>0.0059</td>
+                      <td><strong>0.0014</strong></td>
+                    </tr>
+                    <tr class="result-table-section-row">
+                      <td colspan="3">Success Identification Accuracy (%)</td>
+                    </tr>
+                    <tr>
+                      <td>Standard (SE)</td>
+                      <td>83.3 (10/12)</td>
+                      <td><strong>100.0 (12/12)</strong></td>
+                    </tr>
+                    <tr class="is-emphasis-row is-soft-emphasis-row">
+                      <td>Failure (FE)</td>
+                      <td>83.3 (11/12)</td>
+                      <td><strong>100.0 (12/12)</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="result-table-card reveal">
+              <div class="result-table-head">
+                <p class="result-table-caption">
+                  <strong>Table 2.&nbsp;&nbsp;Quantitative Comparison of Downstream Policy Performance.</strong>
+                  We report the success rate, operational task throughput (episodes completed
+                  per hour), and folding precision (final edge alignment score; detailed
+                  annotation protocol provided in the Supplementary Material) on the
+                  long-horizon towel-folding task. Our proposed <strong>AW-BC (ARM)</strong>
+                  framework significantly outperforms both standard Behavior Cloning and
+                  prior reward-aware baselines across all metrics.
+                </p>
+              </div>
+              <div class="table-scroll">
+                <table class="result-table result-table-policy">
+                  <thead>
+                    <tr>
+                      <th>Model</th>
+                      <th>Success Rate<br />(%)</th>
+                      <th>Task Throughput<br />(Episodes / hr)</th>
+                      <th>Folding Precision<br />(Score)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>BC-Baseline (GR00T N1.5)</td>
+                      <td>62.1</td>
+                      <td>18</td>
+                      <td>2.2</td>
+                    </tr>
+                    <tr>
+                      <td>RA-BC (GR00T + SARM)</td>
+                      <td>78.5</td>
+                      <td>24</td>
+                      <td>2.7</td>
+                    </tr>
+                    <tr class="is-emphasis-row is-soft-emphasis-row">
+                      <td>AW-BC (GR00T + ARM)</td>
+                      <td><strong>99.4</strong></td>
+                      <td><strong>32</strong></td>
+                      <td><strong>3.6</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="result-table-card reveal">
+              <div class="result-table-head">
+                <p class="result-table-caption">
+                  <strong>Table 3.&nbsp;&nbsp;Labeling Efficiency Comparison.</strong>
+                  We compare the sample throughput per 8-hour shift across different protocols.
+                </p>
+              </div>
+              <div class="table-scroll">
+                <table class="result-table result-table-labeling">
+                  <thead>
+                    <tr>
+                      <th>Annotation Protocol</th>
+                      <th>Rate (Samples/8h)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Human Baseline (Seg.)<sup>†</sup></td>
+                      <td>100</td>
+                    </tr>
+                    <tr class="is-emphasis-row is-soft-emphasis-row">
+                      <td>Human Tri-state (Ours)<sup>†</sup></td>
+                      <td><strong>250</strong></td>
+                    </tr>
+                    <tr class="result-table-divider-row">
+                      <td>VLM (Qwen3-VL)<sup>‡</sup></td>
+                      <td>∼ 400</td>
+                    </tr>
+                    <tr class="is-emphasis-row is-soft-emphasis-row">
+                      <td>Auto Tri-state (Ours)<sup>‡</sup></td>
+                      <td><strong>&gt; 2,000</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="result-table-notes">
+                <p><sup>†</sup> Per single human annotator.</p>
+                <p><sup>‡</sup> Inference throughput on a single NVIDIA A100 GPU.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="qualitative-analysis reveal">
+            <div class="qualitative-analysis-head">
+              <span class="results-tables-kicker">Qualitative Analysis</span>
+              <h3>Qualitative comparison of ground-truth labeling and reconstructed progress behavior</h3>
+              <p>
+                Beyond the quantitative tables, the paper also compares how different
+                supervision schemes and reconstructed progress signals behave over real
+                long-horizon episodes. The figures below highlight differences between
+                reference labeling, SARM-style progress estimation, and the smoother
+                trajectory reconstructed by ARM.
+              </p>
+            </div>
+
+            <div class="qualitative-compare-grid">
+              <article class="qualitative-card">
+                <div class="qualitative-card-copy">
+                  <span class="qualitative-card-label">GT Comparison</span>
+                  <h4>Ground-truth comparison across three labeling schemes</h4>
+                  <p>
+                    This figure compares the ground-truth progress targets under three
+                    labeling strategies, exposing how different supervision protocols
+                    distribute progress over the same long-horizon manipulation episode.
+                  </p>
+                </div>
+                <figure class="qualitative-figure-slot" aria-label="Ground-truth comparison figure across three methods">
+                  <img src="paper_source/episode_0000_gt_progress.svg" alt="Ground-truth comparison across three progress labeling methods" class="qualitative-figure-image" />
+                </figure>
+              </article>
+
+              <article class="qualitative-card">
+                <div class="qualitative-card-copy">
+                  <span class="qualitative-card-label">Progress Comparison</span>
+                  <h4>Tri-state ground truth versus SARM and ARM outputs</h4>
+                  <p>
+                    This figure compares the tri-state ground truth with the progress
+                    signals predicted by SARM and ARM, illustrating how ARM produces a
+                    more coherent and temporally aligned reconstruction under complex
+                    transitions.
+                  </p>
+                </div>
+                <figure class="qualitative-figure-slot" aria-label="Comparison of tri-state ground truth with SARM and ARM progress outputs">
+                  <img src="paper_source/episode_0000_progress_comparison.svg" alt="Tri-state ground truth compared with SARM and ARM reconstructed progress" class="qualitative-figure-image" />
+                </figure>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="conclusion-section content-section">
+          <div class="quote-block reveal">
+            <p>
+              "By shifting reward learning from absolute progress to relative advantage,
+              ARM enables cost-effective annotation, robust progress reconstruction,
+              and stronger long-horizon policy optimization."
+            </p>
+          </div>
+        </section>
+
+        <section id="citation" class="citation-section content-section split-layout">
+          <div class="split-copy">
+            <p class="eyebrow">Citation</p>
+            <h2>Reference</h2>
+            <p>
+              A draft BibTeX block is provided below and can
+              be updated later when an official venue or arXiv identifier is available.
+            </p>
+            <button id="copy-citation" class="button button-primary" type="button">Copy BibTeX</button>
+          </div>
+          <div class="citation-card reveal">
+            <pre id="citation-text">@inproceedings{mao2026arm,
+  title     = {ARM: Advantage Reward Modeling for Long-Horizon Manipulation},
+  author    = {Yiming Mao and Zixi Yu and Weixin Mao and Yinhao Li and
+               Qirui Hu and Zihan Lan and Minzhao Zhu and Hua Chen},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision
+               and Pattern Recognition (CVPR)},
+  year      = {2026},
+  url       = {https://github.com/limxdynamics/delta-reward-vla}
+}</pre>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>Copyright © 2026 LimX Dynamics. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <aside class="hero-panel hero-panel-floating reveal is-visible" aria-label="Project snapshot panel">
+      <div class="paper-card floating-card">
+        <div class="card-topline">Project Snapshot</div>
+        <div class="abstract-visual" aria-label="ARM concept illustration">
+          <div class="abstract-ring abstract-ring-large"></div>
+          <div class="abstract-ring abstract-ring-small"></div>
+          <div class="abstract-core">ARM</div>
+          <div class="chip-orbit chip-long-horizon">
+            <div class="abstract-chip">Long-horizon</div>
+          </div>
+          <div class="chip-orbit chip-progressive">
+            <div class="abstract-chip">Progressive</div>
+          </div>
+          <div class="chip-orbit chip-regressive">
+            <div class="abstract-chip">Regressive</div>
+          </div>
+          <div class="chip-orbit chip-stagnant">
+            <div class="abstract-chip">Stagnant</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-cluster">
+        <div class="stat-card accent-coral">
+          <span class="stat-label">Core idea</span>
+          <strong>Relative advantage over absolute progress</strong>
+        </div>
+        <div class="stat-card accent-mint">
+          <span class="stat-label">Training target</span>
+          <strong>Automated gain reconstruction for AW-BC</strong>
+        </div>
+      </div>
+    </aside>
+
+    <script src="script.js"></script>
+  </body>
+</html>
