@@ -4,6 +4,10 @@ ARM is a reward modeling framework for long-horizon robotic manipulation. Instea
 
 This repository currently contains the project website assets, paper figures, and accompanying media for the ARM project.
 
+Project page: https://aiming1998.github.io/ARM/
+
+Current venue: CVPR 2026 Workshop GigaBrain Challenge Submission.
+
 ## Overview
 
 Long-horizon robotic manipulation remains difficult for reinforcement learning because sparse rewards provide weak credit assignment signals, while dense progress rewards are expensive to build and often break down when behaviors include backtracking, recovery, or non-monotonic execution.
@@ -77,10 +81,9 @@ If you find ARM useful, please cite:
   title     = {ARM: Advantage Reward Modeling for Long-Horizon Manipulation},
   author    = {Yiming Mao and Zixi Yu and Weixin Mao and Yinhao Li and
                Qirui Hu and Zihan Lan and Minzhao Zhu and Hua Chen},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision
-               and Pattern Recognition (CVPR)},
+   booktitle = {CVPR 2026 Workshop GigaBrain Challenge Submission},
   year      = {2026},
-  url       = {https://github.com/limxdynamics/delta-reward-vla}
+   url       = {https://aiming1998.github.io/ARM/}
 }
 ```
 
