@@ -815,6 +815,13 @@ p {
   margin-top: 18px;
 }
 
+.operation-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
 .video-card {
   padding: 18px;
   border-radius: 24px;
@@ -1637,7 +1644,8 @@ pre {
   }
 
   .video-gallery-head,
-  .video-gallery {
+  .video-gallery,
+  .operation-gallery {
     grid-template-columns: 1fr;
   }
 
